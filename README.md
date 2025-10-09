@@ -14,8 +14,4 @@
 - Виртуальное окружение (рекомендуется)
 
 ## Установка
-
-1. Клонируйте репозиторий:
-
-```bash
-git clone https://github.com/yaroslav-grishanov98/Python1
+ develop
