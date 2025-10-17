@@ -9,14 +9,15 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'create':
+            permission_classes = [permissions.IsAuthenticated, ~IsModerator()]
+        elif self.action in ['list', 'retrieve']:
             permission_classes = [permissions.IsAuthenticated]
         elif self.action in ['update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsModerator | IsOwner]
-        elif self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [permissions.IsAuthenticated, IsModerator() | IsOwner()]
         else:
             permission_classes = [permissions.IsAuthenticated]
+
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
@@ -33,12 +34,13 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
 
     def get_permissions(self):
-        if self.request.method == 'GET':
-            permission_classes = [permissions.IsAuthenticated]
-        elif self.request.method == 'POST':
+        if self.request.method == 'POST':
+            permission_classes = [permissions.IsAuthenticated, ~IsModerator()]
+        elif self.request.method == 'GET':
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAuthenticated]
+
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -55,12 +57,13 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonSerializer
 
     def get_permissions(self):
-        if self.request.method in ['PUT', 'PATCH']:
-            permission_classes = [permissions.IsAuthenticated, IsModerator | IsOwner]
-        elif self.request.method == 'DELETE':
-            permission_classes = [permissions.IsAuthenticated, IsModerator]
+        if self.request.method == 'DELETE':
+            permission_classes = [permissions.IsAuthenticated, IsOwner()]
+        elif self.request.method in ['PUT', 'PATCH']:
+            permission_classes = [permissions.IsAuthenticated, IsModerator() | IsOwner()]
         else:
             permission_classes = [permissions.IsAuthenticated]
+
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
@@ -68,4 +71,3 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         if user.groups.filter(name='moderators').exists():
             return Lesson.objects.all()
         return Lesson.objects.filter(owner=user)
-
