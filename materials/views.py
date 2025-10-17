@@ -10,11 +10,13 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, ~IsModerator()]
+            permission_classes = [permissions.IsAuthenticated, ~IsModerator]
         elif self.action in ['list', 'retrieve']:
             permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsModerator() | IsOwner()]
+        elif self.action == 'update' or self.action == 'partial_update':
+            permission_classes = [permissions.IsAuthenticated, IsModerator | IsOwner]
+        elif self.action == 'destroy':
+            permission_classes = [permissions.IsAuthenticated, IsOwner]
         else:
             permission_classes = [permissions.IsAuthenticated]
 
@@ -35,7 +37,7 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            permission_classes = [permissions.IsAuthenticated, ~IsModerator()]
+            permission_classes = [permissions.IsAuthenticated, ~IsModerator]
         elif self.request.method == 'GET':
             permission_classes = [permissions.IsAuthenticated]
         else:
@@ -58,9 +60,9 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         if self.request.method == 'DELETE':
-            permission_classes = [permissions.IsAuthenticated, IsOwner()]
+            permission_classes = [permissions.IsAuthenticated, IsOwner]
         elif self.request.method in ['PUT', 'PATCH']:
-            permission_classes = [permissions.IsAuthenticated, IsModerator() | IsOwner()]
+            permission_classes = [permissions.IsAuthenticated, IsModerator | IsOwner]
         else:
             permission_classes = [permissions.IsAuthenticated]
 
