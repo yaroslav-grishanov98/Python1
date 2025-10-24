@@ -6,12 +6,12 @@ from .serializers import UserSerializer, PaymentSerializer, RegisterSerializer
 from .filters import PaymentFilter
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from users.permissions import IsOwner
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from materials.models import Course
 from drf_yasg.utils import swagger_auto_schema
-from users.permissions import IsModerator
 from drf_yasg import openapi
 
 
@@ -50,7 +50,7 @@ class PaymentListView(generics.ListAPIView):
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]  # убрали IsOwnerOr403
+    permission_classes = [IsAuthenticated, IsOwner]  # обычный IsOwner
 
     @swagger_auto_schema(operation_description="Получить или обновить профиль текущего пользователя")
     def get(self, request, *args, **kwargs):

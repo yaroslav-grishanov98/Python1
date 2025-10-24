@@ -1,10 +1,9 @@
 from rest_framework import viewsets, generics, permissions
-from drf_yasg.utils import swagger_auto_schema
 from users.permissions import IsModerator, IsOwner
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from .paginators import StandardResultsSetPagination
-
+from drf_yasg.utils import swagger_auto_schema
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
