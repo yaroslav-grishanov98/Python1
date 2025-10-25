@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'materials',
     'django_filters',
     'payments',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

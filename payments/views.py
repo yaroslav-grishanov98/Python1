@@ -5,6 +5,11 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from payments.stripe_service import create_product, create_price, create_checkout_session
 from materials.models import Course
+from rest_framework import viewsets, permissions
+from users.models import Payment
+from users.serializers import PaymentSerializer
+
+
 
 
 class StripeProductView(APIView):
@@ -53,3 +58,22 @@ class StripeCheckoutSessionView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+
+        product = create_product(payment.paid_course.title, payment.paid_course.description)
+        price = create_price(product.id, int(payment.amount * 100))
+        session = create_checkout_session(
+            price_id=price.id,
+            success_url='https://your-site.com/success',
+            cancel_url='https://your-site.com/cancel'
+        )
+
+        payment.stripe_session_url = session.url
+        payment.save()
