@@ -74,7 +74,7 @@ celerybeat-schedule
 **/migrations/*.py[cod]
 **/migrations/__pycache__/
 
-# Ignore environment variables files
+
 .env
 # .env.*
 

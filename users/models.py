@@ -57,6 +57,7 @@ class Payment(models.Model):
     paid_lesson = models.ForeignKey(Lesson, null=True, blank=True, on_delete=models.SET_NULL, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES)
+    stripe_session_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f'Payment by {self.user} on {self.payment_date}'
