@@ -4,6 +4,11 @@ from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from .paginators import StandardResultsSetPagination
 from drf_yasg.utils import swagger_auto_schema
+from datetime import timedelta
+from django.utils import timezone
+from users.models import Subscription
+from payments.tasks import send_update_email
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -55,6 +60,18 @@ class CourseViewSet(viewsets.ModelViewSet):
         if user.groups.filter(name='moderators').exists():
             return Course.objects.all()
         return Course.objects.filter(owner=user)
+
+    def perform_update(self, serializer):
+        course = self.get_object()
+        last_updated = getattr(course, 'updated_at', None)
+        now = timezone.now()
+
+        updated_course = serializer.save()
+
+        if not last_updated or (now - last_updated) > timedelta(hours=4):
+            subscriptions = Subscription.objects.filter(course=updated_course)
+            for sub in subscriptions:
+                send_update_email.delay(sub.user.email, updated_course.title)
 
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
